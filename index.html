@@ -1,0 +1,452 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Pix2Pix Image Generator</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            max-width: 800px;-->
+<!--            margin: 0 auto;-->
+<!--            padding: 20px;-->
+<!--        }-->
+<!--        .container {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+<!--        .image-container {-->
+<!--            flex: 1;-->
+<!--            margin: 10px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--        img {-->
+<!--            max-width: 100%;-->
+<!--            margin-top: 10px;-->
+<!--        }-->
+<!--        .loading {-->
+<!--            display: none;-->
+<!--            margin-top: 20px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>Pix2Pix Image Generator</h1>-->
+
+<!--    <form id="uploadForm">-->
+<!--        <input type="file" id="imageInput" accept="image/*" required>-->
+<!--        <button type="submit">Generate</button>-->
+<!--    </form>-->
+
+<!--    <div class="loading" id="loading">-->
+<!--        Processing image...-->
+<!--    </div>-->
+
+<!--    <div class="container">-->
+<!--        <div class="image-container">-->
+<!--            <h3>Input Image</h3>-->
+<!--            <img id="inputImage" src="" alt="Input image will appear here">-->
+<!--        </div>-->
+<!--        <div class="image-container">-->
+<!--            <h3>Generated Image</h3>-->
+<!--            <img id="outputImage" src="" alt="Generated image will appear here">-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        document.getElementById('uploadForm').addEventListener('submit', async (e) => {-->
+<!--            e.preventDefault();-->
+
+<!--            const fileInput = document.getElementById('imageInput');-->
+<!--            const file = fileInput.files[0];-->
+<!--            if (!file) return;-->
+
+<!--            // Display input image-->
+<!--            const inputImage = document.getElementById('inputImage');-->
+<!--            inputImage.src = URL.createObjectURL(file);-->
+
+<!--            // Show loading-->
+<!--            document.getElementById('loading').style.display = 'block';-->
+
+<!--            // Create form data-->
+<!--            const formData = new FormData();-->
+<!--            formData.append('image', file);-->
+
+<!--            try {-->
+<!--                const response = await fetch('/generate', {-->
+<!--                    method: 'POST',-->
+<!--                    body: formData-->
+<!--                });-->
+
+<!--                const data = await response.json();-->
+
+<!--                if (data.success) {-->
+<!--                    // Display generated image-->
+<!--                    const outputImage = document.getElementById('outputImage');-->
+<!--                    outputImage.src = 'data:image/png;base64,' + data.image;-->
+<!--                } else {-->
+<!--                    alert('Error generating image: ' + data.error);-->
+<!--                }-->
+<!--            } catch (error) {-->
+<!--                alert('Error: ' + error.message);-->
+<!--            } finally {-->
+<!--                document.getElementById('loading').style.display = 'none';-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pix2Pix Image Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #f5f6fa;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .welcome-message {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        .project-description {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .upload-zone {
+            border: 2px dashed #4a90e2;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        #imageInput {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-zone i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .generate-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .generate-btn:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .image-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .image-container h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(74, 144, 226, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .generating-text {
+            margin-top: 1rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        footer {
+            background: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #preview {
+            max-width: 300px;
+            display: none;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><i class="fas fa-magic"></i> Pix2Pix Image Generator</h1>
+            <p class="welcome-message">Transform your satellite imagery into Google maps with AI</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="project-description">
+            <h2><i class="fas fa-info-circle"></i> About This Project</h2>
+            <p>This project uses Pix2Pix, a conditional adversarial network, to transform realistic satellite imagery into realistic map images. Simply upload your satellite image, and our AI model will generate the corresponding map view.</p>
+        </div>
+
+        <div class="upload-section">
+            <h2><i class="fas fa-upload"></i> Upload Your image</h2>
+            <form id="uploadForm">
+                <div class="upload-zone" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click or drag your satellite image here</p>
+                    <input type="file" id="imageInput" accept="image/*" required>
+                </div>
+                <img id="preview" alt="Image preview">
+                <button type="submit" class="generate-btn" id="generateBtn" disabled>
+                    <i class="fas fa-wand-magic-sparkles"></i> Generate Map View
+                </button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p class="generating-text">Generating Map view...</p>
+        </div>
+
+        <div class="container">
+            <div class="image-container">
+                <h3><i class="fas fa-map"></i> Input Satellite</h3>
+                <img id="inputImage" src="" alt="Input image will appear here">
+            </div>
+            <div class="image-container">
+                <h3><i class="fas fa-satellite"></i> Generated Map View</h3>
+                <img id="outputImage" src="" alt="Generated image will appear here">
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Powered by DBIT | Created with ❤️ for map enthusiasts</p>
+    </footer>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const imageInput = document.getElementById('imageInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const inputImage = document.getElementById('inputImage');
+        const outputImage = document.getElementById('outputImage');
+        const loading = document.getElementById('loading');
+        const preview = document.getElementById('preview');
+
+        // File drag and drop handlers
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#e74c3c';
+        });
+
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#4a90e2';
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#4a90e2';
+
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // File input handler
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Click handler for upload zone
+        uploadZone.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        function handleFile(file) {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    preview.style.display = 'block';
+                    preview.src = e.target.result;
+                    inputImage.src = e.target.result;
+                    generateBtn.disabled = false;
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload an image file');
+            }
+        }
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!imageInput.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+
+            loading.style.display = 'block';
+            generateBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    outputImage.src = 'data:image/png;base64,' + data.image;
+                    outputImage.classList.add('fade-in');
+                } else {
+                    alert('Error generating image: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
